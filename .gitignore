@@ -1,0 +1,132 @@
+Imports Microsoft.SharePoint
+Imports System.Data
+Imports System.IO
+
+Public Class UCRepeater1
+    Inherits System.Web.UI.UserControl
+
+    
+
+    Protected Sub submit_Click(sender As Object, e As EventArgs) Handles submit.Click
+
+
+        'Created site collection object
+        Using _site As SPSite = New SPSite("http://sobi.jtc.gov.sg/")
+            Using _web As SPWeb = _site.OpenWeb()
+                Dim _list As SPList = _web.Lists("Sachin")
+
+                'Dim pos = "seo"
+
+                Dim oSb As New System.Text.StringBuilder
+
+                oSb.Append("         <OrderBy>")
+                oSb.Append("              <FieldRef Name=""ID"" />")
+                oSb.Append("         </OrderBy>")
+                oSb.Append("         <Where>")
+                oSb.Append("              <Eq>")
+                oSb.Append("                   <FieldRef Name=""Title"" />")
+                oSb.Append("                   <Value Type=""Text"">" & TextBox1.Text.Trim() & " </Value>")
+                oSb.Append("              </Eq>")
+                oSb.Append("         </Where>")
+
+                Dim sResult As String = oSb.ToString()
+
+                Dim _query As New SPQuery()
+                _query.Query = sResult
+
+                Dim _listItemCollection As SPListItemCollection = _list.GetItems(_query)
+
+                Dim _listcol As New List(Of myList)
+
+                For Each _itm As SPListItem In _listItemCollection
+                    Dim objmyList As New myList
+                    objmyList.title = _itm("Title")
+                    objmyList.gender = _itm("gender")
+                    objmyList.position = _itm("position")
+                    _listcol.Add(objmyList)
+                Next
+
+
+                rptitems.DataSource = _listcol
+                rptitems.DataBind()
+            End Using
+        End Using
+    End Sub
+End Class
+
+
+Public Class myList
+    Private _title As String
+    Public Property title() As String
+        Get
+            Return _title
+        End Get
+        Set(ByVal value As String)
+            _title = value
+        End Set
+    End Property
+
+    Private _gender As String
+    Public Property gender() As String
+        Get
+            Return _gender
+        End Get
+        Set(ByVal value As String)
+            _gender = value
+        End Set
+    End Property
+
+    Private _position As String
+    Public Property position() As String
+        Get
+            Return _position
+        End Get
+        Set(ByVal value As String)
+            _position = value
+        End Set
+    End Property
+
+
+End Claaa
+
+
+
+//asp file
+<%@ Control Language="VB" AutoEventWireup="false" CodeFile="UCRepeater1.ascx.vb" Inherits="UCRepeater1" %>
+<div>
+
+    <asp:Label ID="lbl" runat="server" Text="TEsting"></asp:Label>
+    <asp:repeater id="rptitems" runat="server">
+
+        <headertemplate>
+            <table>
+                <th>title</th>
+                <th>gender</th>
+                <th>birthday</th>
+
+            </table>
+        </headertemplate>
+        <itemtemplate>
+            <table>
+                <tr>
+                    <td>
+                        <asp:label id="lbltitle" runat="server" Text='<%#Eval("Title")%>'></asp:label>
+                    </td>
+                   <td>
+                        <asp:label id="lblgender" runat="server" Text='<%#Eval("gender")%>'></asp:label>
+                    </td>
+                    <td>
+                        <asp:label id="lblposition" runat="server" Text='<%#Eval("position")%>'></asp:label>
+                    </td>
+
+                </tr>
+            </table>
+        </itemtemplate>
+    </asp:repeater>
+
+</div>
+Enter some thing :
+<asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+<asp:Button ID="submit" runat="server" Text="Bsubmit" />
+
+
